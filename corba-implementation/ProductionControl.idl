@@ -1,0 +1,106 @@
+module ProductionControl {
+    
+    // Etats des machines
+    enum MachineState {
+        STOPPED,
+        RUNNING,
+        FAILURE,
+        MAINTENANCE
+    };
+    
+    // Types de machines
+    enum MachineType {
+        TYPE_A,
+        TYPE_B,
+        TYPE_C,
+        TYPE_D
+    };
+    
+    // Types de pieces
+    enum PartType {
+        PART_TYPE_A,
+        PART_TYPE_B,
+        PART_TYPE_C,
+        PART_TYPE_D
+    };
+    
+    // Etats de la station d'assemblage
+    enum StationState {
+        IDLE,
+        ASSEMBLING,
+        WAITING_PARTS
+    };
+    
+    // Structure pour une machine
+    struct MachineInfo {
+        long id;
+        string name;
+        MachineType type;
+        MachineState state;
+        PartType currentPart;
+        long productionCount;
+    };
+    
+    // Structure pour une zone de stockage
+    struct StorageZoneInfo {
+        PartType partType;
+        long currentQuantity;
+        long maxCapacity;
+    };
+    
+    // Sequences (typedef requis)
+    typedef sequence<StorageZoneInfo> StorageZoneSequence;
+    typedef sequence<MachineInfo> MachineInfoSequence;
+    
+    // Structure pour la station d'assemblage
+    struct AssemblyStationInfo {
+        StationState state;
+        long assembledProducts;
+        StorageZoneSequence storageZones;
+    };
+    
+    // Structure pour les donnees de production completes
+    struct ProductionData {
+        MachineInfoSequence machines;
+        AssemblyStationInfo assemblyStation;
+    };
+    
+    // Structure pour le resultat d'une operation
+    struct OperationResult {
+        boolean success;
+        string message;
+    };
+    
+    // Interface pour controler UNE machine
+    interface MachineControl {
+        // Obtenir les informations de MA machine
+        MachineInfo getMyMachineInfo();
+        
+        // Demarrer MA machine
+        OperationResult startMachine();
+        
+        // Arreter MA machine
+        OperationResult stopMachine();
+        
+        // Signaler une panne sur MA machine
+        OperationResult reportFailure(in string description);
+        
+        // Passer MA machine en mode maintenance
+        OperationResult setMaintenanceMode();
+        
+        // Obtenir toutes les machines (lecture seule)
+        MachineInfoSequence getAllMachines();
+        
+        // Obtenir les donnees de production globales (lecture seule)
+        ProductionData getProductionData();
+    };
+    
+    // Interface du serveur de production
+    interface ProductionServer {
+        // Obtenir un controleur pour une machine specifique
+        MachineControl getMachineControl(in long machineId);
+        
+        // Obtenir les donnees de production
+        ProductionData getProductionData();
+    };
+};
